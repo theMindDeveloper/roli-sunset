@@ -32,6 +32,14 @@ The tool:
 ![ROLI Studio Player running, unlocked](assets/player-unlocked.png)
 ![ROLI Studio Drums running, unlocked](assets/drums-unlocked.png)
 
+**Proof it's the patch doing the work (A/B test):** same machine, same offline license file, same everything — the *only* difference between these two shots is the 6-byte patch:
+
+| Binary unpatched → locked | Binary patched → unlocked |
+|---|---|
+| ![locked](assets/equator2-locked-unpatched.png) | ![unlocked](assets/equator2-unlocked-patched.png) |
+
+> **Why the tool does two things (patch *and* offline file):** the apps run two separate checks — (1) *does a license file exist*, and (2) *is its signature genuine*. The binary patch disables check (2). The offline file satisfies check (1) and carries the user/product data. Delete the file and you get back the "No valid licence was found" screen, even with the patch applied.
+
 ## What this tool does NOT do
 
 - It cannot bring back **server-side content** (cloud preset syncing, online stores, account features). That data lived on dead servers.
@@ -76,6 +84,7 @@ This restores every backed-up original file (binaries, app.asar, license file) b
 
 | Symptom | Cause / fix |
 |---------|-------------|
+| App shows **"Oh no! No valid licence was found."** | The offline license file is missing (deleted, cleaned, or the app was reinstalled). Re-run the patcher — it reinstalls the file. (The patched binary only bypasses the *signature* check; the file itself must exist.) |
 | Windows shows "Windows protected your PC" when you open the patched apps | Patching removes the digital signature the app shipped with, so SmartScreen notices. Click **More info → Run anyway**. It is expected and harmless. |
 | Windows Defender flags the patcher | The script rewrites a few bytes in .exe files, which AV heuristics can flag. This tool is open-source — read it, verify it, and add it to your exclusions if needed. |
 | PowerShell says "running scripts is disabled" | Use the `-ExecutionPolicy Bypass -File` form shown above (it applies per-run, doesn't change your system). |

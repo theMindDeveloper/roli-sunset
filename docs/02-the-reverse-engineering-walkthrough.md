@@ -310,6 +310,26 @@ The full proof, run on a real machine with the real install:
 
 **Lesson:** a patch isn't done when it *works once*; it's done when it works on re-run, survives reboot, and undoes cleanly. That's the whole Phase 9 table.
 
+### Phase 9b — The A/B test that proved it was the patch
+
+The Phase 9 table shows the *system* works, but it doesn't isolate the *patch* as the cause. The app could in principle have unlocked for some other reason. To remove that doubt, a controlled A/B test was run on Equator2 with **every variable held constant except the 6-byte patch**:
+
+| # | State | Offline file | Result |
+|---|-------|--------------|--------|
+| 1 | binary **restored to original** (unpatched) | present (the unsigned offline file) | 🔒 **"Oh no! No valid licence was found."** — `assets/equator2-locked-unpatched.png` |
+| 2 | same binary **re-patched** (6 bytes written) | present (**identical file**) | ✅ full synth UI, unlocked — `assets/equator2-unlocked-patched.png` |
+
+Same machine, same file, same environment. The only difference between row 1 and row 2 is `B8 01 00 00 00 C3` at one offset. Lock → unlock. **The patch, and only the patch, is the unlock mechanism.**
+
+**A bonus discovery: the file must exist.** During the test the offline file was also temporarily *removed* from the patched app. Result: the same "No valid licence was found" screen. That exposed a **second, separate check** that the signature analysis hadn't surfaced:
+
+1. **Existence check** — "is there a license file at all?" (no cryptography; a plain file check) → its failure mode is the "Oh no!" screen
+2. **Validity check** — the gatekeeper function: status 200 + signature chain + expiration → the one our 6-byte patch bypasses
+
+This is why the patcher does **two** things (binary patch **and** offline file install) and why both are non-optional: the patch silences check #2, but the file still has to satisfy check #1 (and still carries the user/product data the app displays).
+
+**Lesson:** "it works" is not the same as "I know *what* makes it work". A controlled A/B (one variable changed, everything else identical) is what converts a working system into a *proven* mechanism. And always test the edge cases (missing file) — they reveal checks you hadn't found.
+
 ---
 
 ## What we deliberately did NOT do
@@ -330,3 +350,4 @@ The full proof, run on a real machine with the real install:
 7. Ship a permanent, neutral, non-expiring offline file.
 8. Wrap in backup/restore/dry-run/idempotency.
 9. Prove the matrix: fresh run, re-run, reboot, restore, re-run.
+10. Isolate the mechanism: A/B test (same file, patch on/off) — lock → unlock, one variable, proven.

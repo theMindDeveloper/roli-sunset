@@ -104,6 +104,9 @@ This is the important part. The file the plugins read looks (simplified) like:
 When a plugin (say Equator2) starts up offline, its native code does this:
 
 ```
+0. Does the .json file even exist?
+     If NOT → an immediate "Oh no! No valid licence was found." screen.
+     This is a separate, simpler check — it happens before any cryptography.
 1. Read the .json file.
 2. Is status == 200?                         (did the "server" say OK?)
 3. Is body.expiration still in the future?   (is the ticket unexpired?)
@@ -122,9 +125,9 @@ Step 4 is a **public-key signature chain** (Ed25519-style, the same family of ma
 
 This is a **tamper-evident seal**: you can open and re-seal the package in any way you like, but the app can tell the seal isn't the original one.
 
-**Consequence:** you cannot fix this by *editing the JSON file* — you'd have to also forge the signature, which is impossible without ROLI's private signing key, which was on the dead servers (or their hardware) and is not publicly available.
+**Consequence:** you cannot fix this by *editing the JSON file* — you'd have to also forge the signature, which is impossible without ROLI's private signing key, which was on the dead servers (or their hardware) and is not publicly available. And you cannot fix it by *deleting* the file either — that trips check #0 and gives you the "No valid licence was found" screen.
 
-That single fact is what forces the entire solution in this repo to be a **binary patch** instead of a "config file fix". More in doc 02.
+That single fact is what forces the entire solution in this repo to be **a binary patch plus a locally-installed offline file** instead of a "config file fix". More in doc 02.
 
 ## The root key, for reference
 
