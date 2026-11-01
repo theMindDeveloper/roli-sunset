@@ -117,14 +117,30 @@ This repo documents the whole process, written for people with **zero** reverse-
 | [docs/01-how-roli-licensing-works.md](docs/01-how-roli-licensing-works.md) | How ROLI's licensing actually works: the login, the token, the offline file, the cryptographic signature. No prior knowledge assumed. |
 | [docs/02-the-reverse-engineering-walkthrough.md](docs/02-the-reverse-engineering-walkthrough.md) | The step-by-step of how the patch was found and proven: real commands, real offsets, the test matrix, and why every decision was made. |
 | [docs/03-beginners-guide-to-reverse-engineering.md](docs/03-beginners-guide-to-reverse-engineering.md) | The concepts and tooling for doing this kind of work yourself: hex, disassembly, x86-64 basics, what the 6-byte patch means, and how to practice legally. |
+| [docs/04-offline-content-restore.md](docs/04-offline-content-restore.md) | The **sound content** side: what the `.rpkg` archives are, the backup manifest with SHA256 hashes, how to restore the sounds, and what can't be recovered. |
+
+## The complete offline suite
+
+The patcher restores *access*; the sounds themselves are *data*. To have a suite that works with **zero** ROLI servers (no login, no token, no store, no cloud), you need all five pieces:
+
+| Piece | Restores | Provided by |
+|-------|----------|-------------|
+| Binary patches (6 files) | the license *check* | this patcher |
+| app.asar edits | Connect's cache-wiping | this patcher |
+| Offline license file | the *exists* + *entitlement* checks | this patcher (embedded) |
+| Sound content (`.rpkg` files, ~9.6 GB) | the actual sounds/instruments | the content archive — see [docs/04](docs/04-offline-content-restore.md) |
+| Hardware/MIDI drivers | ROLI keyboards | already installed, unaffected |
+
+The content archive is too large for this repository (9.6 GB). The reference backup lives at `C:\Users\momo\roli-sunset-backup\ROLI-SoundContent-2026-11-01.tar`; this repo carries its **SHA256 manifest** ([content/](content/)) so any copy can be verified. Host or transfer the tar however suits you (external drive, Drive, private LFS repo) — doc 04 explains restore + verification.
 
 ## Repo layout
 
 ```
 ROLI-Sunset-Patcher.ps1   the tool (single file, no dependencies)
 README.md                  you are here
-docs/                      the learning material
+docs/                      the learning material + content restore guide
 assets/                    screenshots of the working result
+content/                   SHA256 manifest of the sound-content backup archive
 ```
 
 ## License & legal notes
