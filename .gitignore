@@ -1,0 +1,11 @@
+*.log
+*.tmp
+Thumbs.db
+desktop.ini
+$Recycle.Bin/
+roli_sbx/
+roli_test_backup/
+roli_patch_test/
+roli_sunset/
+rolisasar/
+r2/
